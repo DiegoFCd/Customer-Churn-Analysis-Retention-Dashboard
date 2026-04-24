@@ -73,4 +73,4 @@ Potential actions:
 
 ## 🚀 Outcome
 
-This project demonstrates the full BI workflow from raw data ingestion to executive decision-making insights.
+This project demonstrates the full BI workflow from raw data ingestion to executive decision-making insights and the **Key Insight:** The mid-priced customer segment had the highest churn rate (~49%), suggesting opportunities for improvement in pricing and retention.
