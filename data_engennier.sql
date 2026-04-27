@@ -1,4 +1,7 @@
 use `po-db`;
+
+SELECT * FROM `user_telcocustomer_churn`;
+
 SELECT 
   customerID,
   gender,
@@ -71,15 +74,16 @@ USE user_metrics;
 
 SELECT * FROM `user_telcocustomer_churn`;
 
--- “Clientes con contrato mensual tienen mayor churn, lo que indica baja fidelización”
+
+-- Unificamos % de Chur con el conteo de clientes y tipo de contrato
 SELECT 
   Contract,
   AVG(churn) as churn_rate,
   COUNT(*) as users
 FROM user_metrics
-GROUP BY Contract;
+GROUP BY Contract;    -- “Clientes con contrato mensual tienen mayor churn, lo que indica baja fidelización”
 
--- Ahora estás viendo: si precio influye en abandono
+-- Chequeo si precio influye en abandono
 SELECT
  CASE
    WHEN MonthlyCharges < 50 THEN 'LOW'
@@ -93,4 +97,26 @@ GROUP BY price_segment;
 -- Cómo vender esto: Construí una capa analítica desde datos crudos, modelé métricas de churn 
 -- y detecté que el tipo de contrato y la actividad temprana impactan directamente en la retención
 
-SELECT * FROM user_metrics;
+-- inprovement: NTILE
+SELECT
+    customerID,
+    MonthlyCharges,
+    churn,
+    NTILE(3) OVER (ORDER BY MonthlyCharges) AS price_segment
+FROM user_metrics;
+
+-- BALANCEO LOS GRUPOS	
+SELECT
+    CASE 
+        WHEN price_segment = 1 THEN 'Low'
+        WHEN price_segment = 2 THEN 'Mid'
+        ELSE 'High'
+    END AS segment,
+    AVG(churn) AS churn_rate,
+    COUNT(*) AS total_customers
+FROM (
+    SELECT *,
+           NTILE(3) OVER (ORDER BY MonthlyCharges) AS price_segment
+    FROM user_metrics
+) t
+GROUP BY segment;
